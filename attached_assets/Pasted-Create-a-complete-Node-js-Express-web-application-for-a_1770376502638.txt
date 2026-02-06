@@ -1,0 +1,406 @@
+Create a complete Node.js Express web application for a Valentine's Day proposal page generator with the following specifications:
+
+PROJECT NAME: valentine-proposal-generator-2026
+
+TECHNOLOGY STACK:
+- Node.js with Express framework
+- EJS templating engine
+- JSON file-based database
+- Body-parser for form handling
+- UUID for unique ID generation
+- Pure CSS (no external frameworks)
+
+FILE STRUCTURE:
+Create the following files and folders:
+
+/
+├── server.js
+├── package.json
+├── views/
+│   ├── home.ejs
+│   ├── create-page.ejs
+│   ├── success.ejs
+│   └── proposal.ejs
+├── public/
+│   ├── style.css
+│   └── proposal.js
+└── data/
+    └── proposals.json
+
+DEPENDENCIES TO INSTALL:
+- express
+- ejs
+- body-parser
+- uuid
+
+DETAILED FUNCTIONALITY:
+
+1. SERVER.JS - Main Backend (Port 3000)
+
+Features required:
+- Express server setup
+- EJS view engine configuration
+- Static file serving from /public folder
+- Body parser for JSON and URL-encoded data
+- JSON file database at data/proposals.json
+- Initialize empty array in proposals.json if file doesn't exist
+
+Routes required:
+
+a) GET / (Home page)
+   - Render home.ejs
+
+b) GET /create-page (Form page)
+   - Render create-page.ejs
+
+c) POST /generate-proposal (Form submission handler)
+   - Accept: yourName, partnerName, phoneNumber, customMessage
+   - Validate: all required fields present
+   - Generate: 8-character unique ID using uuid
+   - Create proposal object with:
+     * id
+     * yourName
+     * partnerName
+     * phoneNumber
+     * customMessage (with default if not provided)
+     * createdAt (ISO timestamp)
+     * accepted (boolean, default false)
+     * acceptedAt (null initially)
+   - Save to proposals.json
+   - Generate full URL: protocol://host/proposal/{id}
+   - Render success.ejs with proposalUrl, proposalId, partnerName
+
+d) GET /proposal/:id (Proposal page viewer)
+   - Find proposal by ID in database
+   - Return 404 if not found
+   - Render proposal.ejs with proposal data
+
+e) POST /accept-proposal (Acceptance handler)
+   - Accept: proposalId in JSON body
+   - Find proposal in database
+   - Mark accepted: true, set acceptedAt timestamp
+   - Update database
+   - Return JSON: {success: true, phoneNumber, partnerName}
+
+f) GET /admin/proposals (Admin endpoint)
+   - Return JSON with statistics and all proposals
+
+Database helper functions:
+- readDB() - read and parse proposals.json
+- writeDB(data) - write to proposals.json with formatting
+
+2. HOME.EJS - Landing/Welcome Page
+
+Structure:
+- DOCTYPE html5, responsive viewport meta tag
+- Link to /style.css
+- Animated hearts background
+- Main container with:
+  * Large title: "💕 Valentine's Proposal Generator 2026"
+  * Subtitle explaining the service
+  * 3 feature boxes (Personalized, Instant, Notifications) with icons and descriptions
+  * Large CTA button linking to /create-page
+  * "How It Works" section with 7-step ordered list
+  * Footer with "Made with ❤️ for Valentine's Week 2026"
+
+3. CREATE-PAGE.EJS - Form Page
+
+Structure:
+- Animated hearts background
+- Form with POST action to /generate-proposal
+- Form fields (all required except customMessage):
+  
+  a) Your Name (text input)
+     - Placeholder: "e.g., Rahul"
+     - Max length: 50
+     - Help text below
+  
+  b) Partner's Name (text input)
+     - Placeholder: "e.g., Priya"
+     - Max length: 50
+     - Help text below
+  
+  c) WhatsApp Number (tel input)
+     - Placeholder: "e.g., 919876543210"
+     - Pattern: [0-9]{12}
+     - Help text: "Format: 919876543210 (country code + number)"
+     - Example shown
+  
+  d) Custom Message (textarea, optional)
+     - Placeholder: "Add a personal message..."
+     - Rows: 4
+     - Max length: 300
+     - Character counter
+
+- Live preview section showing:
+  * "Your page will say: Hey {partnerName}!"
+  * "Notification will go to: {phoneNumber}"
+
+- JavaScript for:
+  * Live preview updates as user types
+  * Phone number validation before submit
+  * Alert if phone number invalid format
+
+- Submit button: "🚀 Generate My Proposal Page!"
+- Back link to home
+
+4. SUCCESS.EJS - Generated Link Display Page
+
+Structure:
+- Success animation with bouncing title "🎉 Success! Your Page is Ready! 🎉"
+- URL display box with:
+  * Title: "Your Unique Proposal Link:"
+  * Readonly input field showing proposalUrl
+  * Copy button with clipboard functionality
+  * Page ID display
+
+- 3 methods to share section:
+  
+  Method 1: WhatsApp Direct
+  - Green button "💚 Send via WhatsApp"
+  - Clicking opens WhatsApp with pre-filled message
+  
+  Method 2: Copy & Paste
+  - Button to copy full message
+  - Textarea showing complete message to send
+  
+  Method 3: QR Code
+  - Display QR code image using: https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={proposalUrl}
+  - Download QR button
+
+- Important notes section (yellow box) with tips
+- Action buttons: "Create Another Page" and "Back to Home"
+
+JavaScript functions:
+- copyUrl() - copy proposal link to clipboard with success feedback
+- copyMessage() - copy complete message with success feedback
+- sendWhatsApp() - open WhatsApp with pre-filled message
+- downloadQR() - download QR code as image
+- createConfetti() - simple confetti animation on page load
+
+5. PROPOSAL.EJS - The Actual Proposal Page
+
+Structure:
+- Animated floating hearts background
+- Main content container with:
+  * Large greeting: "Hey {partnerName}! 💕"
+  * Question: "Will You Be My Valentine?"
+  * Cute couple GIF from giphy.com
+  * Buttons container with:
+    - YES button (pink gradient, large)
+    - NO button (gray, normal size)
+  * Hint text area (empty initially)
+
+- Hidden success screen overlay with:
+  * "YAAAY! 🎉💕" title
+  * Success messages
+  * Celebration GIF
+  * Custom romantic message from proposal
+  * Notification confirmation
+  * "Play Again?" button
+
+- Canvas element for confetti animation
+- Hidden input with proposalId
+
+Link to /proposal.js for client-side functionality
+
+6. PROPOSAL.JS - Client-Side Proposal Logic
+
+Variables:
+- noButtonClicks counter (tracks attempts)
+- hints array with 8 funny messages
+
+Functions required:
+
+a) moveNoButton()
+   - Get NO button and container elements
+   - Increase YES button size by 3px each time
+   - Move NO button to random position on screen (fixed positioning)
+   - Show next hint from hints array
+   - Decrease NO button size by 2px each time
+
+b) handleYes()
+   - Hide main content
+   - Show success screen with fade-in
+   - Start confetti animation
+   - POST to /accept-proposal with proposalId
+   - On success:
+     * Get phoneNumber and partnerName from response
+     * Wait 2 seconds
+     * Open WhatsApp with celebration message
+     * Message: "🎉 SHE SAID YES! 🎉\n\n{partnerName} accepted your Valentine's proposal!\n\nTime: {timestamp}\n\nCongratulations! 💕"
+
+c) startConfetti()
+   - Get canvas element and 2D context
+   - Set canvas to full window size
+   - Create 200 confetti pieces with random properties:
+     * x, y positions
+     * size (radius)
+     * fall speed
+     * color (from array of 6 colors)
+     * tilt and tilt angle
+   - Animate with requestAnimationFrame
+   - Draw each piece as a line
+   - Update positions each frame
+   - Reset pieces when off-screen
+
+d) Floating hearts animation
+   - setInterval every 300ms
+   - Create div with ❤️ emoji
+   - Random horizontal position
+   - Random size (20-50px)
+   - Random animation duration (4-7s)
+   - Auto-remove after 7 seconds
+
+7. STYLE.CSS - Complete Styling
+
+Global styles:
+- Reset margins, padding, box-sizing
+- Body: gradient background (purple to pink), min-height 100vh
+- Font-family: Segoe UI or similar sans-serif
+
+Background animations:
+- Floating hearts with float-up animation (7s linear)
+- Keyframes for floating from bottom to top with rotation
+
+Container styles:
+- Max-width: 800px
+- Margin: 20px auto
+- Padding: 40px
+- Background: white
+- Border-radius: 20px
+- Box-shadow: 0 20px 60px rgba(0,0,0,0.3)
+- Z-index: 10
+
+Home page specific:
+- main-title: 42px, pink color, shadow
+- subtitle: 20px, gray
+- features: flexbox, 3 columns, wrap on mobile
+- feature-box: padding 20px, light pink background, hover lift effect
+- feature-icon: 48px emoji
+- cta-button: gradient pink background, 20px text, rounded, shadow, hover scale
+- info-section: gray background, rounded, padding 30px
+- Ordered list with spacing
+
+Form page specific:
+- form-title: 36px, pink, centered
+- form-group: margin 25px bottom
+- Labels: bold, dark gray
+- Inputs/textareas: full width, 12px padding, border radius 10px, 2px border
+- Focus state: pink border
+- Small help text: 12px, gray, margin-top 5px
+- form-preview: light pink background, padding 20px, rounded
+- submit-button: full width, gradient, rounded 50px, 20px font, shadow, hover scale
+
+Success page specific:
+- success-title: 38px, green, bounce animation
+- bounce keyframes: translateY up and down
+- url-box: light blue background, dashed green border, padding 25px
+- url-display: flexbox, gap 10px
+- copy-btn: green background, white text, rounded, hover darker
+- method sections: light pink background, padding 20px, margin 20px
+- action-btn: inline-block, padding 12px 30px, rounded 25px, transitions
+- whatsapp-btn: WhatsApp green (#25D366)
+- QR section: centered, image with pink border
+- important-note: yellow background, orange left border, warning style
+
+Proposal page specific:
+- partner-name: 48px, pink, shadow
+- main-question: 32px, dark gray
+- cute-image: 250px circle, pink border, shadow
+- buttons-container: min-height 80px, relative positioning
+- yes-button: gradient pink, 24px font, 18px padding, rounded 50px, shadow, hover scale 1.1
+- no-button: gray background, 24px font, 18px padding, rounded 50px
+- hint: 18px, pink, italic, min-height 30px
+
+Success screen specific:
+- Fixed overlay: full screen, dark transparent background, z-index 1000
+- Hidden by default (display: none), becomes flex when shown
+- success-content: white, 50px padding, rounded 30px, centered
+- popIn animation: scale from 0 to 1 with bounce
+- yay-title: 56px, pink, pulse animation forever
+- pulse keyframes: scale 1 to 1.1
+- celebration-gif: 200px, rounded
+- romantic-message: light pink background, padding 25px, italic text, border-left
+- notification-sent: green, bold
+- play-again-btn: purple gradient, rounded 25px
+
+Confetti:
+- #confettiCanvas: fixed, full screen, pointer-events none, z-index 999
+
+Responsive design:
+- @media (max-width: 768px):
+  * Container: 10px margin, 25px padding
+  * Titles: smaller fonts
+  * Images: reduced size
+  * Buttons: smaller padding and font
+  * Features: column direction
+  * URL display: column direction
+  * Action buttons: column direction
+
+- @media (max-width: 480px):
+  * Further reduced font sizes
+  * Compact spacing
+
+Animations required:
+- fadeIn (opacity and translateY)
+- bounce (translateY)
+- pulse (scale)
+- popIn (scale with cubic-bezier)
+- floatUp (bottom position with rotation)
+- confettiFall (top position with rotation)
+
+8. PROPOSALS.JSON - Database File
+
+Initial content: [] (empty array)
+
+Structure for each proposal object:
+{
+  "id": "abc12345",
+  "yourName": "Rahul",
+  "partnerName": "Priya",
+  "phoneNumber": "919876543210",
+  "customMessage": "Message text here...",
+  "createdAt": "2026-02-06T12:00:00.000Z",
+  "accepted": false,
+  "acceptedAt": null
+}
+
+IMPORTANT DETAILS:
+
+- Server must listen on port 3000
+- All routes must be error-handled
+- Phone number must be exactly 12 digits starting with 91
+- Default custom message if not provided: "From the moment I met you, I knew you were special. Thank you for saying yes to being my Valentine. I promise to make this Valentine's Week 2026 unforgettable!"
+- NO button must use both onmouseover and ontouchstart for mobile support
+- All external images use giphy.com or other reliable CDNs
+- QR code uses free API: api.qrserver.com
+- Console.log important events for debugging
+- All timestamps use ISO format
+- JSON files must be formatted with 2-space indentation
+- Success feedback on button clicks (text change, color change)
+- WhatsApp links use wa.me format
+- Confetti should have 6 different colors: #ff6b9d, #c06c84, #f67280, #355c7d, #ffd93d, #6bcf7f
+- Hearts emoji: ❤️
+- All animations should be smooth with CSS transitions
+
+TESTING CHECKLIST:
+After creation, the app should:
+1. ✅ Run without errors on port 3000
+2. ✅ Show home page at /
+3. ✅ Allow form submission at /create-page
+4. ✅ Generate unique IDs and save to database
+5. ✅ Display success page with working copy buttons
+6. ✅ Show proposal page at /proposal/{id}
+7. ✅ NO button runs away on hover/touch
+8. ✅ YES button triggers confetti and success screen
+9. ✅ WhatsApp notification opens correctly
+10. ✅ All responsive at mobile sizes
+
+ERROR HANDLING:
+- 404 page for invalid proposal IDs
+- Validation for empty required fields
+- Phone number format validation
+- Database read/write error handling
+
+Please create all files with complete, production-ready code. Make the design beautiful, modern, and romantic. Add smooth animations and transitions. Ensure perfect mobile responsiveness. The code should be clean, well-commented, and follow best practices.

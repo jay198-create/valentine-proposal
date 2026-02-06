@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Nunito', sans-serif;
+  --font-display: 'Fredoka', cursive;
+
+  --background: 330 100% 98%;
+  --foreground: 335 80% 15%;
+  
+  --primary: 335 85% 55%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 310 60% 95%;
+  --secondary-foreground: 335 80% 20%;
+  
+  --muted: 330 30% 96%;
+  --muted-foreground: 335 40% 40%;
+  
+  --accent: 280 60% 60%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  
+  --border: 335 30% 90%;
+  --input: 335 30% 90%;
+  --ring: 335 85% 55%;
+  
+  --radius: 1rem;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    font-family: var(--font-sans);
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(312, 78%, 91%, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(335, 88%, 93%, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(273, 67%, 92%, 1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(335, 76%, 89%, 1) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight text-foreground/90;
+  }
+}
+
+/* Custom Utilities for glassmorphism */
+@layer utilities {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-xl;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-pink-500;
+  }
+
+  .floating-heart {
+    position: fixed;
+    pointer-events: none;
+    z-index: -1;
+    animation: float-up linear forwards;
+  }
+
+  @keyframes float-up {
+    from {
+      transform: translateY(100vh) scale(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.6;
+      transform: translateY(90vh) scale(1);
+    }
+    to {
+      transform: translateY(-100px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+}
